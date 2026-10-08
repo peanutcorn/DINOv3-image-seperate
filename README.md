@@ -143,15 +143,3 @@ train/validation/test에서 한 번 추출한 뒤 각 비율·Seed에서 재사�
 ```
 
 비교기는 서로 다른 분할/smoke/test 조건 및 중복 Seed 행을 거부합니다.
-
-## 팀 분담 및 확장
-
-1. 모델 담당: `src/models.py`, `features.py`, `train.py`
-2. 데이터/실험 담당: `src/dataset.py`, `configs/`, `scripts/run_experiment.py`, `tests/`
-3. 평가/문서 담당: `src/evaluate.py`, `scripts/compare_results.py`, README 및 보고서
-
-EfficientNet-B0와 Streamlit은 선택 기능입니다. 우선 세 핵심 모델의 본 실험을
-완료하세요. 다른 backbone은 `models.py`에서 모델·전처리·특징 차원을 반환하도록
-추가하고 runner에 이름을 등록하면 됩니다.
-
-실제 이 환경에서 확인한 항목과 미검증 항목은 `VALIDATION.md`에 기록합니다.
