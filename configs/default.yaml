@@ -1,0 +1,21 @@
+seeds: [42]
+ratios: [1.0, 0.5, 0.2, 0.1]
+models: [resnet18_frozen, dinov3_frozen, resnet18_finetune]
+data_dir: data
+cache_dir: cache
+output_dir: results
+download: true
+validation_fraction: 0.1
+split_seed: 2026
+batch_size: 64
+num_workers: 0
+epochs: 20
+patience: 5
+linear_lr: 0.001
+finetune_lr: 0.0001
+weight_decay: 0.0001
+finetune_layers: [layer4, fc]
+dinov3_id: facebook/dinov3-vits16-pretrain-lvd1689m
+dinov3_revision: main
+device: auto
+cpu_threads: 4
