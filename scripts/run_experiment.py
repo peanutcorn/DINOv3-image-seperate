@@ -14,7 +14,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 os.environ.setdefault("TORCH_HOME", str(ROOT / "cache" / "torch"))
-os.environ.setdefault("HF_HOME", str(ROOT / "cache" / "huggingface"))
+# Keep the normal login/token location; redirect only downloaded model files.
+os.environ.setdefault("HF_HUB_CACHE", str(ROOT / "cache" / "huggingface" / "hub"))
 import pandas as pd
 import torch
 from torch import nn

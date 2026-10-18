@@ -51,6 +51,11 @@ CPU에서 1 epoch, 학습 10장(클래스별 1장), 검증 20장, 테스트 20�
 종료 코드는 1입니다. CIFAR-10/ResNet 다운로드 실패는 기본 실험을 실행할 수
 없으므로 오류로 종료합니다.
 
+모델 다운로드 경로는 `HF_HUB_CACHE`로 프로젝트 `cache/huggingface/hub`에
+설정합니다. `HF_HOME`은 프로그램에서 변경하지 않으므로 `hf auth login`으로
+기본 위치에 저장한 로그인 정보를 그대로 사용합니다. 사용자가 직접 설정한
+`HF_HOME` 또는 `HF_HUB_CACHE`는 유지합니다.
+
 ## 본 실험
 
 ```powershell
