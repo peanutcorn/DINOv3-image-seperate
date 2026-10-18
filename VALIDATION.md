@@ -1,5 +1,32 @@
 # 실제 검증 기록
 
+## 2026-10-18 추가 검증: CPU / NVIDIA GPU 선택
+
+- 하드웨어: **NVIDIA GeForce RTX 4080 SUPER**, VRAM 16GB, NVIDIA 드라이버 610.88.
+- 프로젝트 `.venv`에 공식 CUDA 12.8 빌드 `torch 2.9.1+cu128`,
+  `torchvision 0.24.1+cu128`을 설치했습니다. 전역 Python 패키지는 변경하지 않았습니다.
+- `torch.cuda.is_available() == True`와 실제 CUDA 텐서 연산을 확인했습니다.
+- 기본 YAML의 `device: prompt`에 따라 실행 시 `1: CPU`, `2: NVIDIA GPU`를
+  입력받습니다. `--device cpu/cuda/auto`로 메뉴를 생략할 수도 있습니다.
+- Smoke Test의 CPU 강제 설정을 제거해 선택한 장치에서 최소 실험을 실행합니다.
+- GPU 미지원·잘못된 입력·입력 없음·자동 선택에 대한 테스트 6개를 추가했습니다.
+- 전체 단위 테스트: **14 passed**. Ruff: **All checks passed**.
+- 실제 메뉴에 `2`를 입력한 GPU Smoke Test에서 **세 모델 모두 정상 종료**:
+  `results/20261018_132701_947101_smoke/`.
+  `environment.json`에 `cuda`, RTX 4080 SUPER, CUDA 빌드 버전이 기록됐습니다.
+- 실제 메뉴에 `1`을 입력한 CPU Smoke Test에서 **ResNet18 Frozen과 Fine-tuning 정상 종료**:
+  `results/20261018_132715_155329_smoke/`.
+- 최초 GPU 검증은 sandbox 네트워크 제한으로 HF HEAD 재시도가 발생해 중단하고,
+  재실행 시 `HF_HUB_OFFLINE=1`로 앞서 받은 공식 모델 캐시를 사용했습니다.
+  이 환경 변수는 검증 명령에만 설정했으며 프로그램 기본 동작을 변경하지 않았습니다.
+- 전체 데이터·다중 Seed 본 실험은 실행하지 않았습니다. 아래의 과거 CPU 전용
+  환경 기록은 변경 전 상태이며, 현재 프로젝트 venv에서는 CPU/GPU 모두 지원합니다.
+
+```powershell
+.\.venv\Scripts\python.exe scripts/run_experiment.py
+# 1 또는 2 입력
+```
+
 ## 2026-10-18 추가 검증: 로그인 경로 수정 및 DINOv3 성공
 
 이전 실행기가 `HF_HOME`을 프로젝트 캐시로 변경하면서 `hf auth login`의 기본

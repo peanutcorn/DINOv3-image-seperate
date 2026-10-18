@@ -25,7 +25,14 @@ from src.models import build_resnet, build_dino, trainable_parameters
 from src.features import extract_features
 from src.train import fit
 from src.evaluate import evaluate
-from src.utils import read_config, save_json, seed_everything, fingerprint
+from src.utils import (
+    read_config,
+    save_json,
+    seed_everything,
+    fingerprint,
+    resolve_device,
+    select_device,
+)
 
 
 def run(config, smoke=False):
@@ -38,7 +45,6 @@ def run(config, smoke=False):
             num_workers=0,
             ratios=[0.1],
             seeds=[42],
-            device="cpu",
         )
     if config["epochs"] < 1 or len(set(config["seeds"])) != len(config["seeds"]):
         raise ValueError("epochs must be positive and seeds must be distinct")
@@ -49,10 +55,12 @@ def run(config, smoke=False):
         if not 0 < ratio <= 1:
             raise ValueError("ratios must be in (0, 1]")
     torch.set_num_threads(config["cpu_threads"])
-    device = (
-        torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if config["device"] == "auto"
-        else torch.device(config["device"])
+    device = resolve_device(config["device"])
+    config["device"] = str(device)
+    print(
+        f"Execution device: {device}"
+        + (f" ({torch.cuda.get_device_name(device)})" if device.type == "cuda" else ""),
+        flush=True,
     )
     output = (
         ROOT
@@ -307,18 +315,27 @@ def main():
     parser.add_argument(
         "--smoke",
         action="store_true",
-        help="Real CIFAR-10/pretrained weights; CPU 1 epoch, 10 train/20 val/20 test",
+        help="Real CIFAR-10/pretrained weights; selected device, 1 epoch, 10 train/20 val/20 test",
     )
     parser.add_argument("--models", nargs="+")
     parser.add_argument("--seeds", nargs="+", type=int)
     parser.add_argument("--ratios", nargs="+", type=float)
+    parser.add_argument(
+        "--device",
+        choices=["cpu", "cuda", "auto"],
+        help="Skip the input menu and use the specified device",
+    )
     args = parser.parse_args()
     config = read_config(args.config)
     for key in ["models", "seeds", "ratios"]:
         if getattr(args, key) is not None:
             config[key] = getattr(args, key)
     try:
+        config["device"] = select_device(args.device or config.get("device", "prompt"))
         run(config, args.smoke)
+    except KeyboardInterrupt:
+        print("Experiment interrupted.", file=sys.stderr)
+        return 130
     except Exception as error:
         print(f"Experiment failed ({type(error).__name__}): {error}", file=sys.stderr)
         print(

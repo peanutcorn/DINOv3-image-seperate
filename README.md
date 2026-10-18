@@ -16,9 +16,47 @@ py -3.11 -m venv .venv
 
 `requirements.txt`는 검증 대상 버전을 고정합니다. torch 2.9.1 / torchvision
 0.24.1은 대응 버전이며, Transformers 4.56.2에는 DINOv3 API가 있습니다.
-GPU 환경에서는 [PyTorch 설치 안내](https://pytorch.org/get-started/locally/)로
-해당 버전의 CUDA wheel을 설치하고 `torch.cuda.is_available()`을 확인하세요.
-`device: auto`는 CUDA가 있으면 GPU, 없으면 CPU를 선택합니다.
+NVIDIA GPU를 사용하려면 프로젝트 venv에 CUDA 지원 버전을 설치합니다.
+현재 버전에 대응하는 [공식 설치 명령](https://pytorch.org/get-started/previous-versions/)은 다음과 같습니다.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install --upgrade torch==2.9.1+cu128 torchvision==0.24.1+cu128 --index-url https://download.pytorch.org/whl/cu128
+```
+
+CUDA 지원 PyTorch에서도 CPU 실행을 선택할 수 있습니다.
+
+## 실행 장치 선택
+
+기본 설정(`device: prompt`)에서는 실행할 때 다음 메뉴가 나옵니다.
+
+```text
+Select execution device:
+  1: CPU
+  2: NVIDIA GPU
+Enter 1 or 2:
+```
+
+`1` 또는 `2`를 입력하고 Enter를 누르세요. GPU를 선택하면 실제 GPU 이름도
+출력됩니다. GPU가 사용 불가능하면 이유를 출력하고 다시 선택받습니다.
+입력한 GPU 선택을 자동으로 CPU로 변경하지 않습니다.
+
+메뉴 없이 실행하려면 `--device cpu` 또는 `--device cuda`를 지정합니다.
+`--device auto`는 GPU가 있으면 GPU, 없으면 CPU를 선택합니다.
+YAML에서도 `device: cpu`, `cuda`, `auto`로 메뉴를 생략할 수 있습니다.
+
+```powershell
+# 기본: 1 또는 2 입력
+.\.venv\Scripts\python.exe scripts/run_experiment.py
+# 메뉴 없이 GPU 최소 실험
+.\.venv\Scripts\python.exe scripts/run_experiment.py --smoke --device cuda
+# 메뉴 없이 CPU 최소 실험
+.\.venv\Scripts\python.exe scripts/run_experiment.py --smoke --device cpu
+```
+
+Smoke Test도 선택한 장치를 사용합니다. 결과의 `config.json`과
+`environment.json`에 실제 장치와 하드웨어 이름을 기록하며, CPU와 GPU는
+서로 다른 특징 캐시를 사용합니다. CPU/GPU 간 수치가 완전히 같을 필요는 없고,
+같은 환경에서 재현성을 유지하도록 설정합니다.
 
 ## 먼저 실행할 최소 실험
 
@@ -29,7 +67,7 @@ GPU 환경에서는 [PyTorch 설치 안내](https://pytorch.org/get-started/loca
 
 Smoke test도 **실제 CIFAR-10과 ImageNet 사전학습 ResNet18**을 사용합니다.
 최초 실행은 CIFAR-10 약 170MB와 가중치 약 45MB 다운로드가 필요합니다.
-CPU에서 1 epoch, 학습 10장(클래스별 1장), 검증 20장, 테스트 20장으로
+선택한 CPU 또는 GPU에서 1 epoch, 학습 10장(클래스별 1장), 검증 20장, 테스트 20장으로
 파이프라인만 검증합니다. 이 수치는 연구 성능 결과로 사용할 수 없습니다.
 외부 다운로드가 없는 단위 테스트는 `python -m pytest -q`로 실행합니다.
 
